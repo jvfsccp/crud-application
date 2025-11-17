@@ -36,4 +36,51 @@ public class ProdutoDAO {
         return produto;
     }
 
+    public List<Produto> readAll() throws SQLException {
+        List<Produto> produtos = new ArrayList<>();
+        String sql = "SELECT * FROM produtos";
+
+        try (Connection conn = ConexaoMySQL.getConexao();
+               PreparedStatement stmt = conn.prepareStatement(sql);
+               ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Produto produto = new Produto();
+                produto.setId(rs.getInt("id"));
+                produto.setNome(rs.getString("nome"));
+                produto.setQuantidade(rs.getInt("quantidade"));
+                produto.setValor(rs.getBigDecimal("valor"));
+                produtos.add(produto);
+            }
+        }
+
+        return produtos;
+        
+    }
+
+    public boolean update(Produto produto) throws SQLException {
+        String sql = "UPDATE produtos SET nome = ?, quantidade = ?, valor = ? WHERE id = ?";
+
+        try (Connection conn = ConexaoMySQL.getConexao();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, produto.getNome());
+            stmt.setInt(2, produto.getQuantidade());
+            stmt.setBigDecimal(3, produto.getValor());
+            stmt.setInt(4, produto.getId());
+
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+    public boolean delete(int id) throws SQLException {
+        String sql = "DELETE FROM produtos WHERE id = ?";
+
+        try (Connection conn = ConexaoMySQL.getConexao();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            return stmt.executeUpdate() > 0;
+        }
+    }
 }
